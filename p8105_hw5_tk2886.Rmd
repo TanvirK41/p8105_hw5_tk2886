@@ -8,6 +8,23 @@ output: github_document
 ```{r message = FALSE, echo = FALSE}
 library(tidyverse)
 library(purrr)
+
+## Set Global Options 
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6, 
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
@@ -41,7 +58,25 @@ merging_data =
 
 ### Tidying the data 
 ```{r}
+merging_data %>%
+  janitor::clean_names() %>%
+  gather(key = week, value = arm_val, week_1:week_8) %>%
+  separate(experiment_group, into = c("experiment_group", "subject_id"), sep = "_") %>%
+  mutate(experiment_group = recode(experiment_group, 
+                    "con" = "Control",
+                    "exp" = "Experiment")) %>%
+  mutate(week = str_remove(week, "week_")) %>%
+  mutate(week = as.integer(week)) %>%
+  mutate(subject_id = str_remove(subject_id, ".csv")) %>% 
+  mutate(subject_id = as.integer(subject_id)) %>%
+  mutate(across(.cols = c(experiment_group, subject_id), as.factor)) %>%
+  select(experiment_group, subject_id, arm_val, week)
 
 ```
 
+
+### Creating the Spaghetti Plot
+```{r}
+
+```
 
