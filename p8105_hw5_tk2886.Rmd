@@ -19,8 +19,29 @@ file_name_list = list.files("./data")
 file_name_list
 
 study_df <- tibble(files = file_name_list)
+study_df
 ```
 
 
+### Creating an iteration function 
+```{r}
+csv_iteration = 
+  function(data_files) {
+  participant_data = 
+    read_csv(file = paste0("./data/", data_files)) %>% 
+    mutate(experiment_group = data_files)
+}
+```
+
+### Merging all the file data 
+```{r}
+merging_data = 
+  map_df(file_name_list, csv_iteration) 
+```
+
+### Tidying the data 
+```{r}
+
+```
 
 
