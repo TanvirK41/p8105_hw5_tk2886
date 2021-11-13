@@ -58,7 +58,8 @@ merging_data =
 
 ### Tidying the data 
 ```{r}
-merging_data %>%
+arm_dfc <-
+  merging_data %>%
   janitor::clean_names() %>%
   gather(key = week, value = arm_val, week_1:week_8) %>%
   separate(experiment_group, into = c("experiment_group", "subject_id"), sep = "_") %>%
@@ -69,7 +70,7 @@ merging_data %>%
   mutate(week = as.integer(week)) %>%
   mutate(subject_id = str_remove(subject_id, ".csv")) %>% 
   mutate(subject_id = as.integer(subject_id)) %>%
-  mutate(across(.cols = c(experiment_group, subject_id), as.factor)) %>%
+  mutate(across(.cols = c(experiment_group, subject_id, week), as.factor)) %>%
   select(experiment_group, subject_id, arm_val, week)
 
 ```
@@ -77,6 +78,11 @@ merging_data %>%
 
 ### Creating the Spaghetti Plot
 ```{r}
-
+arm_dfc %>%
+  ggplot(aes(x = week, y = arm_val, color = subject_id)) + 
+  geom_point(size = .5) + 
+  geom_line(aes(group = subject_id),  alpha = .5) + 
+  facet_grid(~experiment_group)
+  
 ```
 
