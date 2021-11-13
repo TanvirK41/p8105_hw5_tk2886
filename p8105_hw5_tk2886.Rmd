@@ -1,11 +1,26 @@
 ---
 title: "p8105_hw5_tk2886"
-author: Tanvir Khan
+author: "Tanvir Khan"
 date: 11/13/2021
 output: github_document
 ---
 
 ```{r message = FALSE, echo = FALSE}
 library(tidyverse)
+library(purrr)
 ```
+
+
+# Problem 2 
+
+### Using the list.files function to gather all file names in the specified directory
+```{r}
+file_name_list = list.files("./data")
+file_name_list
+
+study_df <- tibble(files = file_name_list)
+```
+
+
+
 
