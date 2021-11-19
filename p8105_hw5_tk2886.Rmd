@@ -28,15 +28,58 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
+
+# Problem 1
+
+### Reading the  raw data 
+```{r}
+raw_data <-
+  read_csv("./homicide-data.csv") 
+```
+**Analysis: ** Based on the raw data, there is 52,179 victims in the 50 large U.S. cities. The data includes the location of the killing, in most cases, basic demographic information about each victim.
+
+```{r}
+homicide_df <-
+  raw_data %>%
+  mutate(disposition = as.factor(disposition)) %>%
+  mutate(city_state = str_c(city, ", ", state)) %>%
+  group_by(city_state) 
+```
+
+### **Total** Number of Homicides for each city 
+```{r}
+homicide_count <- 
+  homicide_df %>%
+  summarise(total_number_homicide = n(),
+            unsolved_homicide = sum(disposition == "Open/No arrest" & disposition == "Closed without arrest"))
+```
+
+```{r}
+unsolved_proportions <- 
+  homicide_count %>%
+  filter(city_state == "Baltimore, MD") 
+
+```
+
+
+
+### Total Number of **Open/No arrest** Homicides for each city 
+```{r}
+homicide_df %>%
+  filter(disposition == "Open/No arrest") %>%
+  count(city_state)
+```
+
+###
+
 # Problem 2 
 
 ### Using the list.files function to gather all file names in the specified directory
 ```{r}
 file_name_list = list.files("./data")
-file_name_list
+
 
 study_df <- tibble(files = file_name_list)
-study_df
 ```
 
 
@@ -76,13 +119,55 @@ arm_dfc <-
 ```
 
 
-### Creating the Spaghetti Plot
+### Creating the Spaghetti Plot and seperating by control and experiment group 
 ```{r}
 arm_dfc %>%
   ggplot(aes(x = week, y = arm_val, color = subject_id)) + 
   geom_point(size = .5) + 
   geom_line(aes(group = subject_id),  alpha = .5) + 
-  facet_grid(~experiment_group)
-  
+  facet_grid(~experiment_group) +
+  labs(
+    title = "Temperature plot",
+    x = "Week",
+    y = "Arm Value",
+    caption = "Longitudinal study that includes a control arm and an experimental arm") +
+  viridis::scale_color_viridis(
+    name = "Subject ID", 
+    discrete = TRUE
+  )
+```
+
+
+
+
+
+# Problem 3 - Code was provided by professor 
+```{r}
+set.seed(10)
+
+iris_with_missing = iris %>% 
+  map_df(~replace(.x, sample(1:150, 20), NA)) %>%
+  mutate(Species = as.character(Species))
+```
+
+
+
+### Creating a function 
+```{r}
+iris_function = function(x) {
+  if (!is.numeric(x) & !is.character(x)) {
+    stop("Argument should be numeric or character")
+ } else if (is.numeric(x)) {
+   replace_na(x, round(mean(x, na.rm = TRUE),2))
+ } else if (is.character(x)) {
+   replace_na(x, "virginica")
+ }}
+```
+#### #Function first checks if the argument that is passed in is a numeric or character and if it is true, then we go to the next conditional statement block or else the function will stop and display an error message.
+
+
+
+```{r}
+map_dfr(iris_with_missing, iris_function)
 ```
 
