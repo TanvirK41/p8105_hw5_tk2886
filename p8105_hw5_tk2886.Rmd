@@ -70,9 +70,15 @@ homicide_df %>%
   count(city_state)
 ```
 
-###
+
+
+
+
+
 
 # Problem 2 
+
+
 
 ### Using the list.files function to gather all file names in the specified directory
 ```{r}
@@ -81,6 +87,7 @@ file_name_list = list.files("./data")
 
 study_df <- tibble(files = file_name_list)
 ```
+
 
 
 ### Creating an iteration function 
@@ -93,11 +100,15 @@ csv_iteration =
 }
 ```
 
+
+
 ### Merging all the file data 
-```{r}
+```{r message = FALSE}
 merging_data = 
   map_df(file_name_list, csv_iteration) 
 ```
+
+
 
 ### Tidying the data 
 ```{r}
@@ -119,6 +130,7 @@ arm_dfc <-
 ```
 
 
+
 ### Creating the Spaghetti Plot and seperating by control and experiment group 
 ```{r}
 arm_dfc %>%
@@ -127,7 +139,7 @@ arm_dfc %>%
   geom_line(aes(group = subject_id),  alpha = .5) + 
   facet_grid(~experiment_group) +
   labs(
-    title = "Temperature plot",
+    title = "Observations on each subject over time for Control and Experiment Group",
     x = "Week",
     y = "Arm Value",
     caption = "Longitudinal study that includes a control arm and an experimental arm") +
@@ -141,7 +153,11 @@ arm_dfc %>%
 
 
 
-# Problem 3 - Code was provided by professor 
+# Problem 3
+
+
+
+### Code was provided by professor 
 ```{r}
 set.seed(10)
 
@@ -163,11 +179,11 @@ iris_function = function(x) {
    replace_na(x, "virginica")
  }}
 ```
-#### #Function first checks if the argument that is passed in is a numeric or character and if it is true, then we go to the next conditional statement block or else the function will stop and display an error message.
+#### Function first checks if the argument that is passed in is a numeric or character and if it is true, then we go to the next conditional statement block or else the function will stop and display an error message.
 
 
 
 ```{r}
 map_dfr(iris_with_missing, iris_function)
 ```
-
+#### I used map_dfr because this function directly binds the rows when map output is a dataframe or a named vector.
