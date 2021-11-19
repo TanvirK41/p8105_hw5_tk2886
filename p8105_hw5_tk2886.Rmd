@@ -97,7 +97,7 @@ csv_iteration =
   participant_data = 
     read_csv(file = paste0("./data/", data_files)) %>% 
     mutate(experiment_group = data_files)
-}
+  }
 ```
 
 
