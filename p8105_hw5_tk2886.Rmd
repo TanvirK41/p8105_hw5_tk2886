@@ -203,7 +203,7 @@ arm_dfc %>%
   )
 ```
 
-### Analysis of plot: The arm value for experiment group subjects have an upward trend from week 1 to week 8. It is important to state in some weeks the arm value decreases for specific subjects in the experiment group but when comparing week 1 to week 8, the arm value is overall upward trend for all subjects. The arm value for control group for each subject fluctuates from week 1 to week 8. There seems to be no specific trends or patterns for the control group because sometimes the arm value will increase for one week and then another week the arm value will decerase and then increase again. ALso, there is not a significant change in arm value for each subject in the control group from week 1 versus week 8. 
+Analysis of plot: The arm value for experiment group subjects have an upward trend from week 1 to week 8. It is important to state in some weeks the arm value decreases for specific subjects in the experiment group but when comparing week 1 to week 8, the arm value is overall upward trend for all subjects. The arm value for control group for each subject fluctuates from week 1 to week 8. There seems to be no specific trends or patterns for the control group because sometimes the arm value will increase for one week and then another week the arm value will decrease and then increase again. Also, there is not a significant change in arm value for each subject in the control group from week 1 versus week 8. 
 
 
 
