@@ -29,6 +29,8 @@ scale_fill_discrete = scale_fill_viridis_d
 
 
 
+
+
 # Problem 1
 
 ```{r}
@@ -36,6 +38,10 @@ homicide_data <-
   read_csv(file = "./homicide-data.csv")
 ```
 **Analysis: ** Based on the raw data, there is 52,179 victims in the 50 large U.S. cities. The data includes the location of the killing, in most cases, basic demographic information about each victim.
+
+
+
+
 
 
 # clean the data, added a column called city_state, and grouped by city 
@@ -53,12 +59,17 @@ homicide_dfc
 
 # displays the total homicide count for each city and the total unsolved homicides for specific disposition
 ```{r}
-homicides_summmary <-
+homicides_summary <-
   homicide_dfc %>%
   summarise(total_homicide = n(), 
             unsolved_homicide = sum(
-              disposition == "Closed without arrest" | disposition == "Open/No arrest"))
+              disposition == "Closed without arrest" | 
+                disposition == "Open/No arrest"))
+
+homicides_summary
 ```
+
+
 
 
 
@@ -68,7 +79,8 @@ baltimore_homicide <-
   homicide_dfc %>%
   filter(city == "Baltimore") %>%
   summarize(total_homicide_bm = n(),
-            unsolved_homicide_bm = sum(disposition == "Closed without arrest" | disposition == "Open/No arrest"))
+            unsolved_homicide_bm = sum(disposition == "Closed without arrest" | 
+                                         disposition == "Open/No arrest"))
 
 baltimore_homicide
 ```
@@ -79,8 +91,10 @@ baltimore_homicide
 
 ```{r}
 baltimore_statistics <-
-  prop.test(x = pull(baltimore_homicide, unsolved_homicide_bm), n = pull(baltimore_homicide, total_homicide_bm))
+  prop.test(x = baltimore_homicide %>% pull(unsolved_homicide_bm), 
+            n = baltimore_homicide %>% pull(total_homicide_bm))
 ```
+
 
 
 
@@ -93,8 +107,18 @@ baltimore_statistics %>%
 ```
 
 
-```{r}
 
+
+
+
+```{r}
+summarizing_homicide = 
+  function(total, unsolved){
+    summarizing_city = prop.test(total, unsolved) %>%
+      broom::tidy() %>%
+    select(estimate, conf.low, conf.high)
+    
+    summarizing_city}
 ```
 
 
