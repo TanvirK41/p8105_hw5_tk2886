@@ -5,6 +5,10 @@ date: 11/13/2021
 output: github_document
 ---
 
+
+
+
+
 ```{r message = FALSE, echo = FALSE}
 library(tidyverse)
 library(purrr)
@@ -130,8 +134,6 @@ nested_df %>%
 
 # Problem 2 
 
-
-
 ### Using the list.files function to gather all file names in the specified directory and then putting all the files in a tibble. 
 ```{r}
 file_name_list = list.files("./data")
@@ -207,11 +209,11 @@ Analysis of plot: The arm value for experiment group subjects have an upward tre
 
 
 
+
+
 # Problem 3
 
-
-
-### The first part of the code was provided by professor 
+## The first part of the code was provided by professor 
 ```{r}
 set.seed(10)
 
@@ -224,7 +226,7 @@ iris_with_missing
 
 
 
-### Creating a function called iris_function
+## Creating a function called iris_function
 ```{r}
 iris_function = function(x) {
   if (!is.numeric(x) & !is.character(x)) {
