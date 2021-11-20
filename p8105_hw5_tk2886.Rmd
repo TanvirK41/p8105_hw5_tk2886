@@ -40,8 +40,9 @@ homicide_data <-
 
 n_row = homicide_data %>% nrow()
 n_col = homicide_data %>% ncol()
+key_var = homicide_data %>% names()
 ```
-**Analysis:** Based on the raw data, there is 52,179 victims in the 50 large U.S. cities. The data includes the location of the killing, in most cases, basic demographic information about each victim. The *number of rows* in the raw homicide data that was provided is **`r n_row`**. The *number of columns* in the raw homicide data that was provided is **`r n_col`**. 
+**Analysis:** Based on the raw data, there is 52,179 observations of homicide cases in the 50 large U.S. cities. The data includes the location of the killing, basic demographic information about each victim, the status of the case, reported date of the homicide, and the case id (uid). The *number of rows* in the raw homicide data that was provided is **`r n_row`**. The *number of columns* in the raw homicide data that was provided is **`r n_col`**. They key variables in this raw data set are: **` r key_var`**. 
 
 
 
