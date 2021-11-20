@@ -31,44 +31,73 @@ scale_fill_discrete = scale_fill_viridis_d
 
 # Problem 1
 
-### Reading the  raw data 
 ```{r}
-raw_data <-
-  read_csv("./homicide-data.csv") 
+homicide_data <-
+  read_csv(file = "./homicide-data.csv")
 ```
 **Analysis: ** Based on the raw data, there is 52,179 victims in the 50 large U.S. cities. The data includes the location of the killing, in most cases, basic demographic information about each victim.
 
-```{r}
-homicide_df <-
-  raw_data %>%
-  mutate(disposition = as.factor(disposition)) %>%
-  mutate(city_state = str_c(city, ", ", state)) %>%
-  group_by(city_state) 
-```
 
-### **Total** Number of Homicides for each city 
+# clean the data, added a column called city_state, and grouped by city 
 ```{r}
-homicide_count <- 
-  homicide_df %>%
-  summarise(total_number_homicide = n(),
-            unsolved_homicide = sum(disposition == "Open/No arrest" & disposition == "Closed without arrest"))
-```
+homicide_dfc <- 
+  homicide_data %>%
+  janitor::clean_names() %>%
+  mutate(city_state = str_c(city, state, sep = ",")) %>%
+  group_by(city)
 
-```{r}
-unsolved_proportions <- 
-  homicide_count %>%
-  filter(city_state == "Baltimore, MD") 
-
+homicide_dfc
 ```
 
 
 
-### Total Number of **Open/No arrest** Homicides for each city 
+# displays the total homicide count for each city and the total unsolved homicides for specific disposition
 ```{r}
-homicide_df %>%
-  filter(disposition == "Open/No arrest") %>%
-  count(city_state)
+homicides_summmary <-
+  homicide_dfc %>%
+  summarise(total_homicide = n(), 
+            unsolved_homicide = sum(
+              disposition == "Closed without arrest" | disposition == "Open/No arrest"))
 ```
+
+
+
+# created a r code that outputs the total homicide count and the total unsolved homicide in Baltimore, MD. 
+```{r}
+baltimore_homicide <-
+  homicide_dfc %>%
+  filter(city == "Baltimore") %>%
+  summarize(total_homicide_bm = n(),
+            unsolved_homicide_bm = sum(disposition == "Closed without arrest" | disposition == "Open/No arrest"))
+
+baltimore_homicide
+```
+
+
+
+
+
+```{r}
+baltimore_statistics <-
+  prop.test(x = pull(baltimore_homicide, unsolved_homicide_bm), n = pull(baltimore_homicide, total_homicide_bm))
+```
+
+
+
+
+# pulled estimate proportions, confidence intervals 
+```{r}
+baltimore_statistics %>%
+  broom::tidy() %>%
+  select(estimate, conf.low, conf.high)
+```
+
+
+```{r}
+
+```
+
+
 
 
 
