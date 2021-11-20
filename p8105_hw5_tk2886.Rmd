@@ -36,8 +36,12 @@ scale_fill_discrete = scale_fill_viridis_d
 ```{r}
 homicide_data <-
   read_csv(file = "./homicide-data.csv")
+
+
+n_row = homicide_data %>% nrow()
+n_col = homicide_data %>% ncol()
 ```
-**Analysis: ** Based on the raw data, there is 52,179 victims in the 50 large U.S. cities. The data includes the location of the killing, in most cases, basic demographic information about each victim.
+**Analysis:** Based on the raw data, there is 52,179 victims in the 50 large U.S. cities. The data includes the location of the killing, in most cases, basic demographic information about each victim. The *number of rows* in the raw homicide data that was provided is **`r n_row`**. The *number of columns* in the raw homicide data that was provided is **`r n_col`**. 
 
 
 
@@ -46,109 +50,75 @@ homicide_data <-
 
 # clean the data, added a column called city_state, and grouped by city 
 ```{r}
-homicide_dfc <- 
+homicide_clean_data <-
   homicide_data %>%
-  janitor::clean_names() %>%
-  mutate(city_state = str_c(city, state, sep = ",")) %>%
-  group_by(city)
-
-homicide_dfc
-```
-
-
-
-# displays the total homicide count for each city and the total unsolved homicides for specific disposition
-```{r}
-homicides_summary <-
-  homicide_dfc %>%
-  summarise(total_homicide = n(), 
-            unsolved_homicide = sum(
-              disposition == "Closed without arrest" | 
-                disposition == "Open/No arrest"))
-
-homicides_summary
-```
+  mutate(city_state = str_c(city, state),
+         resolution = case_when(
+          disposition == "Closed without arrest" ~ "unsolved",
+         disposition == "Open/No arrest" ~ "unsolved",
+         disposition == "Closed by arrest" ~ "solved"
+         ))  %>%
+  relocate(city_state) %>%
+  filter(city_state != "TulsaAL")
 
 
+baltimore_df <-  
+  homicide_clean_data %>%
+  filter(city_state == "BaltimoreMD")
+
+baltimore_summary <-
+  baltimore_df %>% 
+  summarise(
+    unsolved = sum(resolution == "unsolved"),
+    n = n()
+  )
+
+baltimore_test <-
+  prop.test(
+  x = baltimore_summary %>% pull(unsolved),
+  n = baltimore_summary %>% pull(n)
+  )
+
+baltimore_test %>% 
+  broom::tidy()
+
+prop_test_fucntion <- function(city_df) {
+  
+  city_summary =
+  city_df %>% 
+  summarise(
+    unsolved = sum(resolution == "unsolved"),
+    n = n()
+  )
+  
+  city_test =
+  prop.test(
+  x = city_summary %>% pull(unsolved),
+  n = city_summary %>% pull(n)
+  )
+  
+  
+  return(city_test)
+}
 
 
+nested_df <-
+  homicide_clean_data %>% 
+  nest(data = uid:resolution) %>%
+  mutate(
+    test_results = map(data, prop_test_fucntion),
+    tidy_results = map(test_results, broom::tidy)
+  ) %>%
+  select(city_state, tidy_results) %>%
+  unnest(tidy_results) %>%
+  select(city_state, estimate, starts_with("conf"))
 
-# created a r code that outputs the total homicide count and the total unsolved homicide in Baltimore, MD. 
-```{r}
-baltimore_homicide <-
-  homicide_dfc %>%
-  filter(city == "Baltimore") %>%
-  summarize(total_homicide_bm = n(),
-            unsolved_homicide_bm = sum(disposition == "Closed without arrest" | 
-                                         disposition == "Open/No arrest"))
-
-baltimore_homicide
-```
-
-
-
-
-
-```{r}
-baltimore_statistics <-
-  prop.test(x = baltimore_homicide %>% pull(unsolved_homicide_bm), 
-            n = baltimore_homicide %>% pull(total_homicide_bm))
-```
-
-
-
-# pulled estimate proportions, confidence intervals 
-```{r}
-baltimore_statistics %>%
-  broom::tidy() %>%
-  select(estimate, conf.low, conf.high)
-```
-
-
-
-```{r}
-summarizing_homicide = 
-  function(total, unsolved){
-    summarizing_city = prop.test(total, unsolved) %>%
-      broom::tidy() %>%
-    select(estimate, conf.low, conf.high)
-    
-    summarizing_city}
-```
-
-
-
-
-
-```{r}
-city_homicide_statistics = 
-  map2(.x = homicides_summary %>% pull(unsolved_homicide), 
-       .y = homicides_summary %>% pull(total_homicide), 
-       ~summarizing_homicide(.x, .y)) %>%
-  bind_rows() %>%
-  mutate(city_state = homicides_summary %>% pull(city)) %>%
-  select(city_state, everything())
-
-city_homicide_statistics
-```
-
-
-
-
-```{r}
-city_homicide_statistics %>% 
-  ggplot(aes(x = reorder(city_state, estimate), 
-             y = estimate)) +
+nested_df %>% 
+  mutate(city_state = fct_reorder(city_state, estimate)) %>%
+  ggplot(aes(x = city_state, y = estimate)) +
   geom_point() +
-  geom_errorbar(aes(ymin = conf.low, 
-                    ymax = conf.high)) +
-  theme(axis.text.x = 
-          element_text(angle = 80, hjust = 1)) +
-  labs(
-    title = "Estimates and Confidence Intervals for Each City",
-    x = "(City, State)",
-    y = "Estimates",
-    caption = "Data from the Washington Post")
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
 
@@ -161,7 +131,7 @@ city_homicide_statistics %>%
 
 
 
-### Using the list.files function to gather all file names in the specified directory
+### Using the list.files function to gather all file names in the specified directory and then putting all the files in a tibble. 
 ```{r}
 file_name_list = list.files("./data")
 
@@ -171,7 +141,7 @@ study_df <- tibble(files = file_name_list)
 
 
 
-### Creating an iteration function 
+### Creating a function in which the files are passed in. 
 ```{r}
 csv_iteration = 
   function(data_files) {
@@ -186,7 +156,7 @@ csv_iteration =
 ### Merging all the file data 
 ```{r message = FALSE}
 merging_data = 
-  map_df(file_name_list, csv_iteration) 
+  map_df(study_df, csv_iteration) 
 ```
 
 
@@ -208,6 +178,7 @@ arm_dfc <-
   mutate(across(.cols = c(experiment_group, subject_id, week), as.factor)) %>%
   select(experiment_group, subject_id, arm_val, week)
 
+arm_dfc
 ```
 
 
@@ -220,8 +191,9 @@ arm_dfc %>%
   geom_line(aes(group = subject_id),  alpha = .5) + 
   facet_grid(~experiment_group) +
   labs(
-    title = "Observations on each subject over time for Control and Experiment Group",
-    x = "Week",
+    title = "Arm Values for each subject over 8 weeks",
+    subtitle = "Comparing Control Subjects and Experiment Group Subjects", 
+    x = "Week", 
     y = "Arm Value",
     caption = "Longitudinal study that includes a control arm and an experimental arm") +
   viridis::scale_color_viridis(
@@ -229,7 +201,7 @@ arm_dfc %>%
     discrete = TRUE
   )
 ```
-### Analysis of plot: The arm value for experiment group increases from week 1 to week 8 for all subjects. It is important to state in some weeks the arm value decreases for specific subjects but when comparing from week 1 to week 8, the arm value increases for all subjects. The arm value for control group for each subject fluctuates from week 1 to week 8. THere is no clear pattern for the control group because sometimes the arm value will increase then another week the value will decerase and then increase again. 
+### Analysis of plot: The arm value for experiment group increases from week 1 to week 8 for all subjects. It is important to state in some weeks the arm value decreases for specific subjects but when comparing from week 1 to week 8, the arm value increases for all subjects. The arm value for control group for each subject fluctuates from week 1 to week 8. There is no clear pattern for the control group because sometimes the arm value will increase then another week the arm value will decerase and then increase again. 
 
 
 
@@ -238,24 +210,26 @@ arm_dfc %>%
 
 
 
-### Code was provided by professor 
+### The first part of the code was provided by professor 
 ```{r}
 set.seed(10)
 
 iris_with_missing = iris %>% 
   map_df(~replace(.x, sample(1:150, 20), NA)) %>%
   mutate(Species = as.character(Species))
+
+iris_with_missing
 ```
 
 
 
-### Creating a function 
+### Creating a function called iris_function
 ```{r}
 iris_function = function(x) {
   if (!is.numeric(x) & !is.character(x)) {
     stop("Argument should be numeric or character")
  } else if (is.numeric(x)) {
-   replace_na(x, round(mean(x, na.rm = TRUE),2))
+   replace_na(x, mean(x, na.rm = TRUE))
  } else if (is.character(x)) {
    replace_na(x, "virginica")
  }}
@@ -265,6 +239,7 @@ iris_function = function(x) {
 
 
 ```{r}
-map_dfr(iris_with_missing, iris_function)
+iris_values = map_dfr(iris_with_missing, iris_function)
+iris_values
 ```
 #### I used map_dfr because this function directly binds the rows when map output is a dataframe or a named vector.
