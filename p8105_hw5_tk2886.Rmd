@@ -97,17 +97,12 @@ baltimore_statistics <-
 
 
 
-
-
 # pulled estimate proportions, confidence intervals 
 ```{r}
 baltimore_statistics %>%
   broom::tidy() %>%
   select(estimate, conf.low, conf.high)
 ```
-
-
-
 
 
 
@@ -122,6 +117,39 @@ summarizing_homicide =
 ```
 
 
+
+
+
+```{r}
+city_homicide_statistics = 
+  map2(.x = homicides_summary %>% pull(unsolved_homicide), 
+       .y = homicides_summary %>% pull(total_homicide), 
+       ~summarizing_homicide(.x, .y)) %>%
+  bind_rows() %>%
+  mutate(city_state = homicides_summary %>% pull(city)) %>%
+  select(city_state, everything())
+
+city_homicide_statistics
+```
+
+
+
+
+```{r}
+city_homicide_statistics %>% 
+  ggplot(aes(x = reorder(city_state, estimate), 
+             y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, 
+                    ymax = conf.high)) +
+  theme(axis.text.x = 
+          element_text(angle = 80, hjust = 1)) +
+  labs(
+    title = "Estimates and Confidence Intervals for Each City",
+    x = "(City, State)",
+    y = "Estimates",
+    caption = "Data from the Washington Post")
+```
 
 
 
