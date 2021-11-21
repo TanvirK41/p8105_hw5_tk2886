@@ -43,7 +43,9 @@ homicide_data <-
 
 
 n_row = homicide_data %>% nrow()
+
 n_col = homicide_data %>% ncol()
+
 key_var = homicide_data %>% names()
 ```
 **Analysis:** Based on the raw data, there is 52,179 observations of homicide cases in the 50 large U.S. cities. The data includes the location of the killing, basic demographic information about each victim, the status of the case, reported date of the homicide, and the case id (uid). The *number of rows* in the raw homicide data that was provided is **`r n_row`**. The *number of columns* in the raw homicide data that was provided is **`r n_col`**. They key variables in this raw data set are: **`r key_var`**. 
@@ -232,9 +234,10 @@ iris_function = function(x) {
   if (!is.numeric(x) & !is.character(x)) {
     stop("Argument should be numeric or character")
  } else if (is.numeric(x)) {
-   replace_na(x, mean(x, na.rm = TRUE))
+   x = replace_na(x, mean(x, na.rm = TRUE))
  } else if (is.character(x)) {
-   replace_na(x, "virginica")
+   x = replace_na(x, "virginica")
+ return(as.vector(x))
  }}
 ```
 #### Function first checks if the argument that is passed in is a numeric or character and if it is true, then we go to the next conditional statement block or else the function will stop and display an error message.
